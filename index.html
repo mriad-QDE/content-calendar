@@ -112,6 +112,11 @@ details p { color: var(--muted); font-size: 12.5px; margin: 6px 0; }
 .slide .sh b { display: block; font-size: 12.5px; font-weight: 600; line-height: 1.2; }
 .slide .sh span { display: block; font-size: 10.5px; color: var(--s-muted); margin-top: 2px; letter-spacing: .03em; }
 .slide .sh span em { font-style: normal; font-weight: 700; color: var(--c); }
+.slide .pr { display: flex; gap: 9px; align-items: flex-start; min-width: 0; }
+.slide .pr i { width: 10px; height: 10px; border-radius: 50%; background: var(--c); flex: none; margin-top: 3px; }
+.slide .pr b { display: block; font-size: 11.5px; font-weight: 600; line-height: 1.2; }
+.slide .pr span { display: block; font-size: 10px; color: var(--s-muted); margin-top: 1px; letter-spacing: .03em; }
+.slide .side.dense .pr b { font-size: 10.5px; } .slide .side.dense .pr span { font-size: 9px; }
 .slide .obs { display: flex; flex-wrap: wrap; gap: 5px 8px; align-items: center; }
 .slide .obs span { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; color: var(--s-muted); font-weight: 600; }
 .slide .obs i { font-style: normal; font-size: 8px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: #fff; padding: 2px 6px; border-radius: 999px; }
@@ -127,11 +132,7 @@ details p { color: var(--muted); font-size: 12.5px; margin: 6px 0; }
 .slide .dow { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; height: 30px; }
 .slide .dow div { font-size: 12px; letter-spacing: .14em; text-transform: uppercase; background: var(--s-dow); color: var(--s-dow-fg); display: flex; align-items: center; justify-content: center; font-weight: 600; border-radius: 2px; }
 .slide .week { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; min-height: 0; position: relative; }
-.slide .week .day { padding-bottom: calc(5px + var(--lanes, 0) * 10px); }
-.slide .pbar { position: absolute; height: 7px; border-radius: 4px; opacity: .92; display: flex; align-items: center; box-shadow: 0 0 0 1px var(--s-bg); }
-.slide .pbar b { font-size: 6.5px; font-weight: 800; color: #fff; letter-spacing: .08em; padding-left: 4px; line-height: 1; }
 .slide .item .ad { flex: none; font-size: calc(8 * var(--u)); font-weight: 700; letter-spacing: .04em; border: 1px solid; border-radius: 3px; padding: 0 calc(4 * var(--u)); line-height: 1.5; white-space: nowrap; }
-.slide.compact .pbar { height: 5px; } .slide.compact .pbar b { display: none; } .slide.compact .week .day { padding-bottom: calc(4px + var(--lanes, 0) * 7px); }
 .slide .day { background: var(--s-cell); border: 1px solid var(--s-line); border-radius: 2px; padding: 4px 6px 5px; display: flex; flex-direction: column; gap: 3px; min-width: 0; position: relative; }
 .slide .day.out { background: transparent; border-color: transparent; }
 .slide .day.wknd { background: var(--s-cell-alt); }
@@ -190,7 +191,7 @@ details p { color: var(--muted); font-size: 12.5px; margin: 6px 0; }
 <div class="top">
   <div>
     <h1>Content Calendar Builder</h1>
-    <p>Pick the brand, choose the month (or months), add the posts. The slide on the right is the deliverable: download it as an editable PowerPoint or a PNG. <span class="note" id="buildStamp">v12 · 20 Oct 15:57</span></p>
+    <p>Pick the brand, choose the month (or months), add the posts. The slide on the right is the deliverable: download it as an editable PowerPoint or a PNG. <span class="note" id="buildStamp">v13 · 20 Oct 16:05</span></p>
   </div>
   <div class="row">
     <button id="btnPng" class="small">Download PNG</button>
@@ -613,9 +614,7 @@ function monthHtml(ym, b, opts) {
       const items = list.map(e => itemHtml(e, b, opts.showProject)).join('');
       cells += `<div class="day${list.length ? ' has' : ''}${(dow === 5 || dow === 6) ? ' wknd' : ''}"><div class="n">${d}</div>${items}</div>`;
     }
-    const segs = promoLanes(ym, b, r, offset, days), nl = segs.length ? Math.max(...segs.map(s => s.lane)) + 1 : 0;
-    const bars = segs.map(s => `<div class="pbar" style="left:calc(${s.c0} * 100% / 7 + 4px);width:calc(${s.c1 - s.c0 + 1} * 100% / 7 - 8px);bottom:${4 + s.lane * 10}px;background:${s.color}" title="${esc(s.e.title)}">${s.start ? '<b>AD</b>' : ''}</div>`).join('');
-    weeks += `<div class="week" style="--lanes:${nl}">${cells}${bars}</div>`;
+    weeks += `<div class="week">${cells}</div>`;
   }
   const dowRow = Array.from({ length: 7 }, (_, c) => `<div>${DOW[(c + state.weekStart) % 7].slice(0, 3)}</div>`).join('');
   return `<div class="mo" style="--rows:${rows}">${opts.showName ? `<div class="mname">${MONTHS[m - 1]} ${y}</div>` : ''}<div class="dow">${dowRow}</div>${weeks}</div>`;
@@ -630,9 +629,11 @@ function render() {
   const cats = state.categories.filter(c => all.some(e => e.category === c.id));
   const logo = LOGOS[b.logo];
   const plats = PLATFORMS.filter(p => all.some(e => (e.platforms || []).includes(p.id)));
-  const side = `<aside class="side${camps.length > 7 ? ' dense' : ''}">
+  const promos = all.filter(e => e.promoEnd).sort((p, q) => p.date.localeCompare(q.date));
+  const side = `<aside class="side${camps.length + promos.length > 9 ? ' dense' : ''}">
       ${camps.length ? `<div class="sec"><h4>Happenings</h4>${camps.map(c => { const r = campRange(c.id, all); return `<div class="sh" style="--c:${c.color}"><i></i><div><b>${esc(c.label)}</b><span><em>${r.n}</em> ${r.n === 1 ? 'post' : 'posts'} · ${r.range}</span></div></div>`; }).join('')}</div>` : ''}
       ${cats.length ? `<div class="sec"><h4>Objectives</h4><div class="obs">${cats.map(c => `<span><i style="background:${c.color}">${esc(c.label)}</i>${postCount(all.filter(e => e.category === c.id))}</span>`).join('')}</div></div>` : ''}
+      ${promos.length ? `<div class="sec"><h4>Paid promotion</h4>${promos.map(e => { const c = campOf(e); return `<div class="pr" style="--c:${c ? c.color : b.muted}"><i></i><div><b>${esc(e.title)}</b><span>${promoRange(e)}</span></div></div>`; }).join('')}</div>` : ''}
       <div class="tot"><b>${postCount(all)}</b> posts${gridNote(all)}</div>
     </aside>`;
   const html = `
@@ -674,6 +675,11 @@ function render() {
   $('entries').querySelectorAll('[data-edit]').forEach(x => x.onclick = () => startEdit(+x.dataset.edit));
 }
 function gridNote(all) { const g = all.filter(e => (typeOf(e).count || 1) > 1).length; return g ? `<br>including ${g} grid post${g === 1 ? '' : 's'} of 3` : ''; }
+function promoRange(e) {
+  const a = new Date(e.date + 'T00:00:00'), z = new Date(e.promoEnd + 'T00:00:00'), days = Math.round((z - a) / 86400000) + 1;
+  const f = (d) => `${d.getDate()} ${MONTHS[d.getMonth()].slice(0, 3)}`;
+  return `${a.getMonth() === z.getMonth() ? a.getDate() + '–' + f(z) : f(a) + ' – ' + f(z)} · ${days} day${days === 1 ? '' : 's'}`;
+}
 function campRange(id, all) {
   const ds = all.filter(e => e.campaign === id).map(e => e.date).sort(); if (!ds.length) return { n: 0, range: '' };
   const f = (s) => { const d = new Date(s + 'T00:00:00'); return `${d.getDate()} ${MONTHS[d.getMonth()].slice(0, 3)}`; };
@@ -685,7 +691,7 @@ function campRange(id, all) {
 // Titles always show in full: each week row is measured at its content height and the leftover space is shared out;
 // if a month cannot fit at full size, the calendar type steps down until it does.
 function fitText() {
-  const m = $('months'); if (!m) return;
+  const m = $('months'); if (!m || !m.clientHeight) return;   // hidden or not laid out yet: leave at full size, render again when visible
   const mos = [...m.querySelectorAll('.mo')], GAP = 4;
   let fs = 1;
   for (let i = 0; i < 14; i++) {
@@ -743,7 +749,7 @@ function pptHeader(pptx, s, b, title, sub) {
 }
 function pptSide(pptx, s, b, R, camps, cats, all) {
   s.addShape(pptx.ShapeType.line, { x: R.x - 0.18, y: R.y, w: 0, h: R.h, line: { color: hx(b.line), width: 0.75 } });
-  const dense = camps.length > 7, fsN = dense ? 8 : 9.5, fsM = dense ? 7 : 8; let y = R.y;
+  const dense = camps.length + all.filter(e => e.promoEnd).length > 9, fsN = dense ? 8 : 9.5, fsM = dense ? 7 : 8; let y = R.y;
   const rowHFor = (label) => Math.max(1, Math.ceil(label.length * fsN * 0.56 / 72 / (R.w - 0.16))) * fsN * 1.25 / 72 + fsM * 1.25 / 72 + 0.04;
   const h4 = (txt) => { s.addText(txt, { x: R.x, y, w: R.w, h: 0.2, fontFace: b.pptBody, fontSize: 7.5, bold: true, charSpacing: 3, color: hx(b.muted), margin: 0, valign: 'middle' }); y += 0.24; };
   if (camps.length) {
@@ -770,9 +776,20 @@ function pptSide(pptx, s, b, R, camps, cats, all) {
     });
     y += lh + 0.1;
   }
+  const promos = all.filter(e => e.promoEnd).sort((p, q) => p.date.localeCompare(q.date));
+  if (promos.length) {
+    h4('PAID PROMOTION');
+    promos.forEach(e => {
+      const c = campOf(e), rh = rowHFor(e.title) - 0.02;
+      s.addShape(pptx.ShapeType.ellipse, { x: R.x, y: y + 0.05, w: 0.09, h: 0.09, fill: { color: hx(c ? c.color : b.muted) }, line: { color: hx(c ? c.color : b.muted) } });
+      s.addText([{ text: e.title, options: { fontSize: fsN - 1, bold: true, color: hx(b.fg), breakLine: true } }, { text: promoRange(e), options: { fontSize: fsM - 0.5, color: hx(b.muted) } }],
+        { x: R.x + 0.14, y, w: R.w - 0.14, h: rh, fontFace: b.pptBody, valign: 'top', margin: 0, fit: 'shrink' });
+      y += rh + 0.04;
+    });
+  }
   const g = all.filter(e => (typeOf(e).count || 1) > 1).length;
   s.addText([{ text: String(postCount(all)), options: { bold: true, color: hx(b.fg), fontSize: 10 } }, { text: ' posts', options: { color: hx(b.muted), fontSize: 8, breakLine: !!g } },
-             ...(g ? [{ text: `including ${g} grid post${g === 1 ? '' : 's'} of 3`, options: { color: hx(b.muted), fontSize: 7.5 } }] : [])], { x: R.x, y: R.y + R.h - 0.5, w: R.w, h: 0.5, fontFace: b.pptBody, valign: 'bottom', margin: 0 });
+             ...(g ? [{ text: `including ${g} grid post${g === 1 ? '' : 's'} of 3`, options: { color: hx(b.muted), fontSize: 7.5 } }] : [])], { x: R.x, y: Math.max(R.y + R.h - 0.5, y + 0.08), w: R.w, h: 0.5, fontFace: b.pptBody, valign: 'bottom', margin: 0 });
 }
 function pptMonth(pptx, s, b, ym, R, opts) {
   const { y: Y, m, days, offset, rows } = monthInfo(ym), map = entriesFor(ym);
@@ -804,7 +821,7 @@ function pptMonth(pptx, s, b, ym, R, opts) {
   const layoutMeta = (toks, f, w) => { const lines = [[]]; let x = 0; toks.forEach(tk => { const tkw = tokW(tk, f) + 0.07; if (x + tkw > w && lines[lines.length - 1].length) { lines.push([]); x = 0; } lines[lines.length - 1].push({ tk, x, w: tokW(tk, f) }); x += tkw; }); return lines; };
   const mh = (f) => Math.max(lineH(f - 2), 0.17);
   const itemH = (e, f) => titleLines(e.title, f) * lineH(f) + (opts.compact ? 0 : layoutMeta(metaTokens(e), f, iw).length * mh(f)) + 0.08;
-  const laneH = opts.compact ? 0.07 : 0.1, rowSegs = Array.from({ length: rows }, (_, r) => promoLanes(ym, b, r, offset, days)), rowLanes = rowSegs.map(sg => sg.length ? Math.max(...sg.map(s => s.lane)) + 1 : 0);
+  const laneH = 0, rowSegs = Array.from({ length: rows }, () => []), rowLanes = rowSegs.map(() => 0);
   const need = (f) => Array.from({ length: rows }, (_, r) => { let mx = numH + pad; for (let c = 0; c < 7; c++) { const d = r * 7 + c - offset + 1; const list = map[d] || []; if (list.length) mx = Math.max(mx, numH + pad + list.reduce((h, e) => h + itemH(e, f), 0) + (list.length - 1) * itemGap); } return mx + rowLanes[r] * laneH; });
   let needs = need(fs);
   for (let i = 0; i < 8 && needs.reduce((a, c) => a + c, 0) > avail && fs > 4; i++) { fs = Math.round((fs - 0.5) * 10) / 10; needs = need(fs); }
@@ -907,7 +924,7 @@ function showAuth(mode) {
   $('authSignIn').hidden = mode !== 'signin'; $('authSetPw').hidden = mode !== 'setpw'; $('authReset').hidden = mode !== 'reset'; $('authSetup').hidden = mode !== 'setup';
   $('authMsg').textContent = '';
 }
-function showApp() { $('authGate').hidden = true; $('app').hidden = false; fitStage(); }
+function showApp() { $('authGate').hidden = true; $('app').hidden = false; render(); fitStage(); }
 
 async function signIn(ev) {
   ev.preventDefault(); $('authMsg').textContent = 'Signing in…';
@@ -959,7 +976,7 @@ async function createCalendar(name, keepState) {
   const payload = keepState ? state : normalize(structuredClone(SAMPLE));
   if (!keepState) payload.entries = []; if (!keepState) payload.campaigns = [];
   const { data, error } = await sb.from('calendars').insert({ name, brand: payload.brand, data: payload, updated_by: cloud.user.email }).select().single();
-  if (error) { setStatus('Could not create: ' + error.message, 'err'); return; }
+  if (error) { setStatus('Could not create: ' + error.message + (/permission denied/i.test(error.message) ? ' — run the GRANT line from SETUP.md in the Supabase SQL editor' : ''), 'err'); render(); return; }
   await refreshList(); await openCalendar(data.id);
 }
 function dirty() { if (!cloud.current) return; setStatus('Unsaved changes…', 'dirty'); clearTimeout(cloud.timer); cloud.timer = setTimeout(saveNow, 1500); }
