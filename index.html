@@ -190,7 +190,7 @@ details p { color: var(--muted); font-size: 12.5px; margin: 6px 0; }
 <div class="top">
   <div>
     <h1>Content Calendar Builder</h1>
-    <p>Pick the brand, choose the month (or months), add the posts. The slide on the right is the deliverable: download it as an editable PowerPoint or a PNG.</p>
+    <p>Pick the brand, choose the month (or months), add the posts. The slide on the right is the deliverable: download it as an editable PowerPoint or a PNG. <span class="note" id="buildStamp">v12 · 20 Oct 15:57</span></p>
   </div>
   <div class="row">
     <button id="btnPng" class="small">Download PNG</button>
@@ -204,6 +204,7 @@ details p { color: var(--muted); font-size: 12.5px; margin: 6px 0; }
       <div>
         <h2>Brand</h2>
         <div class="brands" id="brands"></div>
+        <p class="note" style="margin:8px 0 0" id="brandNote">Sets the look of this calendar. For another project, choose "+ New calendar…" in the dropdown at the top rather than switching the brand here.</p>
       </div>
       <div class="row" style="align-items:flex-end">
         <div class="field" style="flex:1 1 130px"><label class="lbl" for="month">First month</label><input type="month" id="month"></div>
@@ -246,7 +247,7 @@ details p { color: var(--muted); font-size: 12.5px; margin: 6px 0; }
     <div class="panel stack">
       <div class="row" style="justify-content:space-between">
         <h2 style="margin:0">Posts on this slide <span id="count"></span></h2>
-        <div class="row"><button class="small ghost" id="btnSample">Load sample</button><button class="small ghost" id="btnClear">Clear all</button></div>
+        <div class="row"><button class="small ghost" id="btnSample">Load sample</button><button class="small ghost" id="btnClear">Clear this calendar</button></div>
       </div>
       <div class="row"><span class="lbl">Show</span><button class="small" id="viewDate">By date</button><button class="small" id="viewHap">By happening</button></div>
       <div class="entries" id="entries"></div>
@@ -444,7 +445,7 @@ function buildControls() {
   $('fPromo').onchange = () => { $('promoField').hidden = !$('fPromo').checked; if ($('fPromo').checked && !$('fPromoEnd').value) { const d = new Date(($('fDate').value || state.month + '-01') + 'T00:00:00'); d.setDate(d.getDate() + 6); $('fPromoEnd').value = d.toISOString().slice(0, 10); } };
   $('fTitle').onkeydown = (e) => { if (e.key === 'Enter') addOne(); };
   $('btnBulk').onclick = addBulk;
-  $('btnClear').onclick = () => { state.entries = []; commit(); };
+  $('btnClear').onclick = () => { if ($('btnClear').dataset.armed !== '1') { $('btnClear').dataset.armed = '1'; $('btnClear').textContent = 'Click again to clear this calendar'; setTimeout(() => { $('btnClear').dataset.armed = ''; $('btnClear').textContent = 'Clear this calendar'; }, 4000); return; } state.entries = []; state.campaigns = []; stopEdit(); fillSelects(); commit(); $('btnClear').dataset.armed = ''; $('btnClear').textContent = 'Clear this calendar'; };
   $('btnSample').onclick = () => { state = normalize(structuredClone(SAMPLE)); buildControls(); commit(); };
   $('viewDate').onclick = () => { state.view = 'date'; commit(); };
   $('viewHap').onclick = () => { state.view = 'hap'; commit(); };
