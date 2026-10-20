@@ -32,6 +32,7 @@
   --bg: #15171b; --panel: #1f2227; --fg: #ecebe6; --muted: #9a9ea8; --line: #33373e; --accent: #b7a8e6; --accent-fg: #15121f; --soft: #262c36; --danger: #e07a5f; color-scheme: dark;
 }
 * { box-sizing: border-box; }
+[hidden] { display: none !important; }
 body { background: var(--bg); color: var(--fg); font-family: var(--ui); font-size: 14px; line-height: 1.45;
   padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 16px 40px; }
 h1 { font-family: 'Aleo', Georgia, serif; font-weight: 400; font-size: 26px; margin: 0; text-wrap: balance; }
@@ -81,8 +82,8 @@ button:disabled { opacity: .5; cursor: default; }
 .quick .ttl { grid-column: 1 / -1; display: flex; gap: 6px; }
 .quick .ttl input { flex: 1; }
 button.small[aria-pressed="true"] { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); }
-.auth { max-width: 380px; margin: 10vh auto; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 28px; display: grid; gap: 10px; }
-.auth form { display: grid; gap: 8px; }
+.auth { max-width: 380px; margin: 12vh auto; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 28px; display: grid; gap: 10px; }
+.auth form:not([hidden]) { display: grid; gap: 8px; }
 .auth a { color: var(--accent); font-size: 13px; }
 .calbar { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px; align-items: center; padding: 10px 12px; margin-bottom: 14px; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; }
 #cloudStatus[data-kind="dirty"] { color: var(--muted); } #cloudStatus[data-kind="ok"] { color: #2f7a3e; } #cloudStatus[data-kind="warn"], #cloudStatus[data-kind="err"] { color: var(--danger); font-weight: 600; }
@@ -785,7 +786,8 @@ function showApp() { $('authGate').hidden = true; $('app').hidden = false; fitSt
 async function signIn(ev) {
   ev.preventDefault(); $('authMsg').textContent = 'Signing in…';
   const { error } = await sb.auth.signInWithPassword({ email: $('authEmail').value.trim(), password: $('authPassword').value });
-  if (error) { $('authMsg').textContent = /invalid/i.test(error.message) ? 'Wrong email or password.' : error.message; }
+  if (error) { $('authMsg').textContent = /invalid/i.test(error.message) ? 'Wrong email or password.' : error.message; return; }
+  await enterApp();
 }
 async function sendReset(ev) {
   ev.preventDefault(); $('authMsg').textContent = 'Sending…';
