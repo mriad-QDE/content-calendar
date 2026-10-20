@@ -126,7 +126,12 @@ details p { color: var(--muted); font-size: 12.5px; margin: 6px 0; }
 .slide .mo .mname:empty { display: none; }
 .slide .dow { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; }
 .slide .dow div { font-size: 12px; letter-spacing: .14em; text-transform: uppercase; background: var(--s-dow); color: var(--s-dow-fg); display: flex; align-items: center; justify-content: center; font-weight: 600; border-radius: 2px; }
-.slide .week { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; min-height: 0; }
+.slide .week { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; min-height: 0; position: relative; }
+.slide .week .day { padding-bottom: calc(5px + var(--lanes, 0) * 10px); }
+.slide .pbar { position: absolute; height: 7px; border-radius: 4px; opacity: .92; display: flex; align-items: center; }
+.slide .pbar b { font-size: 6.5px; font-weight: 800; color: #fff; letter-spacing: .08em; padding-left: 4px; line-height: 1; }
+.slide .item .ad { flex: none; font-size: calc(8 * var(--u)); font-weight: 700; letter-spacing: .04em; border: 1px solid; border-radius: 3px; padding: 0 calc(4 * var(--u)); line-height: 1.5; white-space: nowrap; }
+.slide.compact .pbar { height: 5px; } .slide.compact .pbar b { display: none; } .slide.compact .week .day { padding-bottom: calc(4px + var(--lanes, 0) * 7px); }
 .slide .day { background: var(--s-cell); border: 1px solid var(--s-line); border-radius: 2px; padding: 4px 6px 5px; display: flex; flex-direction: column; gap: 3px; min-width: 0; position: relative; }
 .slide .day.out { background: transparent; border-color: transparent; }
 .slide .day.wknd { background: var(--s-cell-alt); }
@@ -224,11 +229,15 @@ details p { color: var(--muted); font-size: 12.5px; margin: 6px 0; }
       <div class="field" id="projectField"><label class="lbl" for="fProject">Project</label><select id="fProject"></select></div>
       <div class="field"><span class="lbl">Platforms</span><div class="chips" id="fPlatforms"></div></div>
       <div class="field"><label class="lbl" for="fTitle">Post title</label><input id="fTitle" placeholder="e.g. Riverside lead gen"></div>
-      <div class="row"><button class="primary" id="btnAdd">Add to calendar</button><span class="note" id="addHint"></span></div>
+      <div class="row" style="align-items:flex-end">
+        <label class="chip" style="padding:7px 10px"><input type="checkbox" id="fPromo" style="width:auto;margin:0 6px 0 0">Promoted (paid ads)</label>
+        <div class="field" id="promoField" style="flex:1 1 140px" hidden><label class="lbl" for="fPromoEnd">Promotion runs until</label><input type="date" id="fPromoEnd"></div>
+      </div>
+      <div class="row"><button class="primary" id="btnAdd">Add to calendar</button><button id="btnCancelEdit" hidden>Cancel</button><span class="note" id="addHint"></span></div>
       <p class="note" style="margin:0">To build a whole happening at once, switch the list below to "By happening": each happening gets its own quick-add row.</p>
       <details>
         <summary>Paste many posts at once</summary>
-        <p>One post per line, copied straight from Excel (tabs) or typed with commas. Columns: <b>Date, Title, Type, Objective, Happening, Platforms, Project</b>. Only the date and title are required; a first line with headings is understood. Platforms can be several, like <code>IG FB LI</code>. Dates like <code>14</code>, <code>14/10/2026</code> or <code>2026-10-14</code> all work.</p>
+        <p>One post per line, copied straight from Excel (tabs) or typed with commas. Columns: <b>Date, Title, Type, Objective, Happening, Platforms, Project, Promoted until</b>. Only the date and title are required; a first line with headings is understood. Platforms can be several, like <code>IG FB LI</code>. Dates like <code>14</code>, <code>14/10/2026</code> or <code>2026-10-14</code> all work.</p>
         <textarea id="bulk" placeholder="14/10/2026	Riverside lead gen	Reel	Tactical	Riverside	IG FB"></textarea>
         <div class="row" style="margin-top:6px"><button class="small" id="btnBulk">Add these posts</button><span class="note" id="bulkHint"></span></div>
       </details>
@@ -348,14 +357,14 @@ const SAMPLE = {
     { date: '2026-10-03', title: 'Sales center content coverage', type: 'video', category: 'event', campaign: 'c3', platforms: ['ig','fb','li'], project: 'cg' },
     { date: '2026-10-05', title: 'Hesham Nazih announcement', type: 'reel', category: 'launch', campaign: 'c5', platforms: ['ig','fb','tt'], project: 'cg' },
     { date: '2026-10-13', title: 'Lifestyle content (teaser)', type: 'story', category: 'lifestyle', campaign: 'c4', platforms: ['ig'], project: 'cg' },
-    { date: '2026-10-14', title: 'Lifestyle content (reveal)', type: 'grid', category: 'lifestyle', campaign: 'c4', platforms: ['ig','fb'], project: 'cg' },
+    { date: '2026-10-14', title: 'Lifestyle content (reveal)', type: 'grid', category: 'lifestyle', campaign: 'c4', platforms: ['ig','fb'], project: 'cg', promoEnd: '2026-10-24' },
     { date: '2026-10-15', title: 'Lifestyle content (reveal)', type: 'reel', category: 'lifestyle', campaign: 'c4', platforms: ['ig','fb','tt'], project: 'cg' },
-    { date: '2026-10-16', title: 'Lifestyle lead gen', type: 'image', category: 'tactical', campaign: 'c4', platforms: ['fb','ig'], project: 'cg' },
+    { date: '2026-10-16', title: 'Lifestyle lead gen', type: 'image', category: 'tactical', campaign: 'c4', platforms: ['fb','ig'], project: 'cg', promoEnd: '2026-10-31' },
     { date: '2026-10-20', title: 'CityGate Club teaser', type: 'reel', category: 'launch', campaign: 'c1', platforms: ['ig','tt'], project: 'cg' },
     { date: '2026-10-21', title: 'CityGate Club brand reveal', type: 'grid', category: 'launch', campaign: 'c1', platforms: ['ig','fb','li'], project: 'cg' },
     { date: '2026-10-22', title: 'Sports club × Mohamed Saadoun', type: 'video', category: 'event', campaign: 'c2', platforms: ['ig','fb','yt'], project: 'cg' },
     { date: '2026-10-23', title: 'CityGate Club awareness', type: 'carousel', category: 'promotion', campaign: 'c1', platforms: ['ig','fb'], project: 'cg' },
-    { date: '2026-10-23', title: 'Club offer lead gen', type: 'image', category: 'tactical', campaign: 'c1', platforms: ['fb'], project: 'cg' },
+    { date: '2026-10-23', title: 'Club offer lead gen', type: 'image', category: 'tactical', campaign: 'c1', platforms: ['fb'], project: 'cg', promoEnd: '2026-11-06' },
     { date: '2026-10-27', title: 'Hesham Nazih teaser', type: 'story', category: 'event', campaign: 'c5', platforms: ['ig'], project: 'cg' },
     { date: '2026-10-29', title: 'Hesham Nazih teaser', type: 'reel', category: 'event', campaign: 'c5', platforms: ['ig','tt'], project: 'cg' },
     { date: '2026-11-04', title: 'Hesham Nazih coverage', type: 'video', category: 'event', campaign: 'c5', platforms: ['ig','fb','yt'], project: 'cg' },
@@ -374,6 +383,7 @@ const SAMPLE = {
 // ---------- State ----------
 let state = normalize(load() || structuredClone(SAMPLE));
 let selPlatforms = new Set(['ig']);
+let editing = null;
 let downloads = null;
 
 function normalize(s) {
@@ -382,6 +392,7 @@ function normalize(s) {
   s.projects = s.projects && s.projects.length ? s.projects : structuredClone(DEFAULT_PROJECTS);
   s.campaigns = s.campaigns || []; s.entries = s.entries || []; s.icons = s.icons || {};
   s.categories.forEach((c, i) => { if (!c.color) c.color = (DEFAULT_CATEGORIES.find(d => d.id === c.id) || {}).color || OBJECTIVE_COLORS[i % OBJECTIVE_COLORS.length]; }); s.view = s.view === 'hap' ? 'hap' : 'date';
+  s.entries.forEach(e => { if (e.promoEnd && e.promoEnd < e.date) e.promoEnd = e.date; });
   s.span = +s.span || 1; s.weekStart = s.weekStart == null ? 6 : +s.weekStart;
   if (!BRANDS[s.brand]) s.brand = 'qd';
   if (!/^\d{4}-\d{2}$/.test(s.month || '')) s.month = new Date().toISOString().slice(0, 7);
@@ -428,6 +439,8 @@ function buildControls() {
   $('eyebrow').oninput = () => { state.eyebrow = $('eyebrow').value; commit(); };
   $('subtitle').oninput = () => { state.subtitle = $('subtitle').value; commit(); };
   $('btnAdd').onclick = addOne;
+  $('btnCancelEdit').onclick = () => stopEdit();
+  $('fPromo').onchange = () => { $('promoField').hidden = !$('fPromo').checked; if ($('fPromo').checked && !$('fPromoEnd').value) { const d = new Date(($('fDate').value || state.month + '-01') + 'T00:00:00'); d.setDate(d.getDate() + 6); $('fPromoEnd').value = d.toISOString().slice(0, 10); } };
   $('fTitle').onkeydown = (e) => { if (e.key === 'Enter') addOne(); };
   $('btnBulk').onclick = addBulk;
   $('btnClear').onclick = () => { state.entries = []; commit(); };
@@ -503,11 +516,25 @@ function addOne() {
   const date = $('fDate').value, title = $('fTitle').value.trim();
   if (!date) { $('addHint').textContent = 'Pick a date.'; return; }
   if (!title) { $('addHint').textContent = 'Give the post a title.'; return; }
-  state.entries.push({ date, title, type: $('fType').value, category: $('fCategory').value, campaign: $('fCampaign').value, platforms: [...selPlatforms], project: $('fProject').value });
+  const promoEnd = $('fPromo').checked ? ($('fPromoEnd').value || date) : '';
+  const rec = { date, title, type: $('fType').value, category: $('fCategory').value, campaign: $('fCampaign').value, platforms: [...selPlatforms], project: $('fProject').value, promoEnd: promoEnd && promoEnd > date ? promoEnd : (promoEnd ? date : '') };
+  if (editing !== null && state.entries[editing]) { state.entries[editing] = rec; stopEdit(); $('addHint').textContent = 'Saved.'; }
+  else { state.entries.push(rec); $('fTitle').value = ''; $('addHint').textContent = 'Added.'; }
   const shown = monthsShown(); if (!shown.includes(date.slice(0, 7))) { state.month = date.slice(0, 7); $('month').value = state.month; }
-  $('fTitle').value = ''; $('addHint').textContent = 'Added.'; setTimeout(() => $('addHint').textContent = '', 1500);
+  $('fPromo').checked = false; $('promoField').hidden = true; $('fPromoEnd').value = '';
+  setTimeout(() => $('addHint').textContent = '', 1500);
   commit();
 }
+function startEdit(i) {
+  const e = state.entries[i]; if (!e) return; editing = i;
+  $('fDate').value = e.date; $('fTitle').value = e.title; $('fType').value = e.type; $('fCategory').value = e.category; $('fCampaign').value = e.campaign || ''; $('fProject').value = e.project || state.projects[0].id;
+  selPlatforms = new Set(e.platforms || []); $('fPlatforms').querySelectorAll('.chip').forEach(c => c.setAttribute('aria-pressed', selPlatforms.has(c.dataset.p)));
+  $('fPromo').checked = !!e.promoEnd; $('promoField').hidden = !e.promoEnd; $('fPromoEnd').value = e.promoEnd || '';
+  $('btnAdd').textContent = 'Save changes'; $('btnCancelEdit').hidden = false; $('addHint').textContent = 'Editing "' + e.title + '"';
+  if ($('fTitle').scrollIntoView) $('fTitle').scrollIntoView({ block: 'center', behavior: 'smooth' }); $('fTitle').focus();
+}
+function stopEdit() { editing = null; $('btnAdd').textContent = 'Add to calendar'; $('btnCancelEdit').hidden = true; $('addHint').textContent = ''; $('fTitle').value = ''; $('fPromo').checked = false; $('promoField').hidden = true; $('fPromoEnd').value = ''; }
+function promoLabel(e) { if (!e.promoEnd) return ''; const d = new Date(e.promoEnd + 'T00:00:00'); return `AD · to ${d.getDate()} ${MONTHS[d.getMonth()].slice(0, 3)}`; }
 function matchOne(list, text) {
   const t = String(text || '').trim().toLowerCase(); if (!t) return null;
   return list.find(x => x.id === t || x.label.toLowerCase() === t) || list.find(x => (x.short || '').toLowerCase() === t) || list.find(x => x.label.toLowerCase().startsWith(t)) || list.find(x => t.startsWith(x.label.toLowerCase().split(' ')[0])) || null;
@@ -522,10 +549,10 @@ function parseDate(s) {
 }
 function addBulk() {
   const lines = $('bulk').value.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
-  let order = ['date', 'title', 'type', 'category', 'campaign', 'platforms', 'project'];
+  let order = ['date', 'title', 'type', 'category', 'campaign', 'platforms', 'project', 'promo'];
   const split = (l) => (l.includes('\t') ? l.split('\t') : l.split(',')).map(c => c.trim());
   if (lines.length && /date/i.test(lines[0]) && !parseDate(split(lines[0])[0])) {
-    const names = { date: /date|day/i, title: /title|post|content|name|desc/i, type: /type|format/i, category: /objective|categor|goal|purpose/i, campaign: /happen|campaign|theme/i, platforms: /platform|channel/i, project: /project|brand/i };
+    const names = { date: /date|day/i, title: /title|post|content|name|desc/i, type: /type|format/i, category: /objective|categor|goal|purpose/i, campaign: /happen|campaign|theme/i, platforms: /platform|channel/i, project: /project|brand/i, promo: /promo|paid|ad|boost/i };
     order = split(lines.shift()).map(h => Object.keys(names).find(k => names[k].test(h)) || null);
   }
   let ok = 0, bad = [];
@@ -536,7 +563,7 @@ function addBulk() {
     if (!camp && (rec.campaign || '').trim()) { camp = { id: uid(), label: rec.campaign.trim(), color: nextColor() }; state.campaigns.push(camp); }
     const platforms = String(rec.platforms || '').split(/[\s;|+\/,]+/).map(p => matchOne(PLATFORMS, p)).filter(Boolean).map(p => p.id);
     state.entries.push({ date, title: rec.title.trim(), type: (matchOne(state.types, rec.type) || state.types[0]).id, category: (matchOne(state.categories, rec.category) || state.categories[0]).id,
-      campaign: camp ? camp.id : '', platforms: platforms.length ? platforms : ['ig'], project: (matchOne(state.projects, rec.project) || state.projects[0]).id });
+      campaign: camp ? camp.id : '', platforms: platforms.length ? platforms : ['ig'], project: (matchOne(state.projects, rec.project) || state.projects[0]).id, promoEnd: (() => { const p = parseDate(rec.promo); return p && p >= date ? p : ''; })() });
     ok++;
   }
   $('bulkHint').textContent = `${ok} added` + (bad.length ? `, ${bad.length} skipped (need a date and a title).` : '.');
@@ -554,7 +581,22 @@ function itemHtml(e, b, showProject) {
   const pj = showProject ? `<span class="pj">${esc((byId(state.projects, e.project) || {}).short || '')}</span>` : '';
   const ty = `<span class="ty">${esc(t.short)}</span>`;
   const ob = cat ? `<span class="ob" style="background:${cat.color}">${esc(cat.label)}</span>` : '';
-  return `<div class="item" style="--c:${col};--tint:${mix(b.cell, col, 0.14)}"><span class="tt">${esc(e.title)}</span><span class="meta">${pj}${ob}${ty}${pl}</span></div>`;
+  const ad = e.promoEnd ? `<span class="ad" style="color:${col};border-color:${col}">${promoLabel(e)}</span>` : '';
+  return `<div class="item" style="--c:${col};--tint:${mix(b.cell, col, 0.14)}"><span class="tt">${esc(e.title)}</span><span class="meta">${pj}${ob}${ty}${ad}${pl}</span></div>`;
+}
+// Paid promotion bars: for one week row, the segments (first col, last col, colour) of every promoted post that overlaps it, packed into lanes.
+function promoLanes(ym, b, r, offset, days) {
+  const [Y, M] = ym.split('-').map(Number), segs = [];
+  const dayIdx = (iso) => { const d = new Date(iso + 'T00:00:00'); return Math.round((d - new Date(Y, M - 1, 1)) / 86400000) + 1; }; // 1 = first of this month
+  state.entries.filter(e => e.promoEnd && e.promoEnd >= e.date).forEach(e => {
+    const a = Math.max(1, dayIdx(e.date)), z = Math.min(days, dayIdx(e.promoEnd)); if (a > days || z < 1) return;
+    const first = r * 7 - offset + 1, last = first + 6, s = Math.max(a, first), en = Math.min(z, last); if (s > en) return;
+    const c = campOf(e); segs.push({ c0: s - first, c1: en - first, color: c ? c.color : b.muted, start: a === s, e });
+  });
+  segs.sort((p, q) => p.c0 - q.c0 || q.c1 - p.c1);
+  const lanes = [];
+  segs.forEach(sg => { let l = lanes.findIndex(end => end < sg.c0); if (l < 0) { lanes.push(sg.c1); l = lanes.length - 1; } else lanes[l] = sg.c1; sg.lane = l; });
+  return segs;
 }
 function monthHtml(ym, b, opts) {
   const { y, m, days, offset, rows } = monthInfo(ym), map = entriesFor(ym);
@@ -568,7 +610,9 @@ function monthHtml(ym, b, opts) {
       const items = list.map(e => itemHtml(e, b, opts.showProject)).join('');
       cells += `<div class="day${list.length ? ' has' : ''}${(dow === 5 || dow === 6) ? ' wknd' : ''}"><div class="n">${d}</div>${items}</div>`;
     }
-    weeks += `<div class="week">${cells}</div>`;
+    const segs = promoLanes(ym, b, r, offset, days), nl = segs.length ? Math.max(...segs.map(s => s.lane)) + 1 : 0;
+    const bars = segs.map(s => `<div class="pbar" style="left:calc(${s.c0} * 100% / 7 + 4px);width:calc(${s.c1 - s.c0 + 1} * 100% / 7 - 8px);bottom:${4 + s.lane * 10}px;background:${s.color}" title="${esc(s.e.title)}">${s.start ? '<b>AD</b>' : ''}</div>`).join('');
+    weeks += `<div class="week" style="--lanes:${nl}">${cells}${bars}</div>`;
   }
   const dowRow = Array.from({ length: 7 }, (_, c) => `<div>${DOW[(c + state.weekStart) % 7].slice(0, 3)}</div>`).join('');
   return `<div class="mo" style="--rows:${rows}"><div class="mname">${opts.showName ? `${MONTHS[m - 1]} ${y}` : ''}</div><div class="dow">${dowRow}</div>${weeks}</div>`;
@@ -604,7 +648,7 @@ function render() {
   $('viewDate').setAttribute('aria-pressed', state.view === 'date'); $('viewHap').setAttribute('aria-pressed', state.view === 'hap');
   const row = ({ e, i }) => {
     const t = typeOf(e), c = campOf(e), cat = byId(state.categories, e.category), d = new Date(e.date + 'T00:00:00');
-    return `<div class="entry"><div class="d">${d.getDate()}<small>${DOW[d.getDay()].slice(0, 3)}${compact ? ' ' + MONTHS[d.getMonth()].slice(0, 3) : ''}</small></div><div class="t"><b><span class="tag" style="background:${c ? c.color : b.muted}"></span>${esc(e.title)}</b><span>${esc(t.short)}${cat ? ' · <i class="tag" style="background:' + cat.color + ';margin-right:3px"></i>' + esc(cat.label) : ''}${c && state.view !== 'hap' ? ' · ' + esc(c.label) : ''} · ${(e.platforms || []).map(id => (byId(PLATFORMS, id) || {}).short || id).join(' ')}</span></div><button class="small ghost" data-del="${i}" aria-label="Remove">✕</button></div>`;
+    return `<div class="entry"><div class="d">${d.getDate()}<small>${DOW[d.getDay()].slice(0, 3)}${compact ? ' ' + MONTHS[d.getMonth()].slice(0, 3) : ''}</small></div><div class="t"><b><span class="tag" style="background:${c ? c.color : b.muted}"></span>${esc(e.title)}</b><span>${esc(t.short)}${cat ? ' · <i class="tag" style="background:' + cat.color + ';margin-right:3px"></i>' + esc(cat.label) : ''}${c && state.view !== 'hap' ? ' · ' + esc(c.label) : ''} · ${(e.platforms || []).map(id => (byId(PLATFORMS, id) || {}).short || id).join(' ')}${e.promoEnd ? ' · <b style="display:inline;color:var(--fg)">' + promoLabel(e) + '</b>' : ''}</span></div><span class="row" style="gap:2px;flex-wrap:nowrap"><button class="small ghost" data-edit="${i}" aria-label="Edit">✎</button><button class="small ghost" data-del="${i}" aria-label="Remove">✕</button></span></div>`;
   };
   if (state.view === 'hap') {
     const groups = [...state.campaigns.map(c => ({ c, items: list.filter(x => x.e.campaign === c.id) })), { c: null, items: list.filter(x => !campOf(x.e)) }];
@@ -623,7 +667,8 @@ function render() {
   } else {
     $('entries').innerHTML = list.length ? list.map(row).join('') : '<div class="empty">No posts in this range yet. Add one above or paste a list.</div>';
   }
-  $('entries').querySelectorAll('[data-del]').forEach(x => x.onclick = () => { state.entries.splice(+x.dataset.del, 1); commit(); });
+  $('entries').querySelectorAll('[data-del]').forEach(x => x.onclick = () => { if (editing === +x.dataset.del) stopEdit(); state.entries.splice(+x.dataset.del, 1); commit(); });
+  $('entries').querySelectorAll('[data-edit]').forEach(x => x.onclick = () => startEdit(+x.dataset.edit));
 }
 function campRange(id, all) {
   const ds = all.filter(e => e.campaign === id).map(e => e.date).sort(); if (!ds.length) return { n: 0, range: '' };
@@ -740,7 +785,8 @@ function pptMonth(pptx, s, b, ym, R, opts) {
   const lineH = (f) => f * 1.22 / 72, iw = colW - 0.18;
   const titleLines = (txt, f) => Math.max(1, Math.ceil(txt.length * f * 0.5 / (iw * 72)));
   const itemH = (e, f) => { const h = titleLines(e.title, f) * lineH(f) + (opts.compact ? 0 : lineH(f - 2)) + 0.07; return h; };
-  const need = (f) => Array.from({ length: rows }, (_, r) => { let mx = numH + pad; for (let c = 0; c < 7; c++) { const d = r * 7 + c - offset + 1; const list = map[d] || []; if (list.length) mx = Math.max(mx, numH + pad + list.reduce((h, e) => h + itemH(e, f), 0) + (list.length - 1) * itemGap); } return mx; });
+  const laneH = opts.compact ? 0.07 : 0.1, rowSegs = Array.from({ length: rows }, (_, r) => promoLanes(ym, b, r, offset, days)), rowLanes = rowSegs.map(sg => sg.length ? Math.max(...sg.map(s => s.lane)) + 1 : 0);
+  const need = (f) => Array.from({ length: rows }, (_, r) => { let mx = numH + pad; for (let c = 0; c < 7; c++) { const d = r * 7 + c - offset + 1; const list = map[d] || []; if (list.length) mx = Math.max(mx, numH + pad + list.reduce((h, e) => h + itemH(e, f), 0) + (list.length - 1) * itemGap); } return mx + rowLanes[r] * laneH; });
   let needs = need(fs);
   for (let i = 0; i < 8 && needs.reduce((a, c) => a + c, 0) > avail && fs > 4; i++) { fs = Math.round((fs - 0.5) * 10) / 10; needs = need(fs); }
   const total = needs.reduce((a, c) => a + c, 0), extra = Math.max(0, avail - total) / rows, scale = total > avail ? avail / total : 1;
@@ -753,6 +799,9 @@ function pptMonth(pptx, s, b, ym, R, opts) {
       const dow = (c + state.weekStart) % 7, x = R.x + c * (colW + gap), list = map[d] || [];
       s.addShape(pptx.ShapeType.rect, { x, y: yy, w: colW, h: rowH, fill: { color: hx((dow === 5 || dow === 6) ? b.cellAlt : b.cell) }, line: { color: hx(b.line), width: 0.5 } });
       s.addText(String(d), { x: x + colW - 0.42, y: yy + 0.02, w: 0.38, h: numH, fontFace: b.pptBody, fontSize: opts.compact ? 6.5 : 8, bold: true, color: hx(list.length ? b.fg : b.muted), align: 'right', margin: 0 });
+      if (c === 6) rowSegs[r].forEach(sg => { const bx = R.x + sg.c0 * (colW + gap) + 0.04, bw = (sg.c1 - sg.c0 + 1) * (colW + gap) - gap - 0.08, by = yy + rowH - 0.05 - (sg.lane + 1) * laneH + 0.015, bh = laneH - 0.03;
+        s.addShape(pptx.ShapeType.roundRect, { x: bx, y: by, w: bw, h: bh, rectRadius: bh / 2, fill: { color: hx(sg.color) }, line: { color: hx(sg.color) } });
+        if (sg.start && !opts.compact) s.addText('AD', { x: bx + 0.03, y: by, w: 0.3, h: bh, fontFace: b.pptBody, fontSize: 4.5, bold: true, color: 'FFFFFF', charSpacing: 1, margin: 0, valign: 'middle' }); });
       let iy = yy + numH + 0.02;
       list.forEach(e => {
         const t = typeOf(e), cp = campOf(e), col = cp ? cp.color : b.muted, cat = byId(state.categories, e.category), ih = itemH(e, fs) * scale, w = colW - 0.08;
@@ -762,7 +811,7 @@ function pptMonth(pptx, s, b, ym, R, opts) {
           s.addText(e.title, { x: x + 0.1, y: iy, w: w - 0.1, h: ih, fontFace: b.pptBody, fontSize: fs, bold: true, color: hx(b.fg), valign: 'middle', margin: 0, fit: 'shrink' });
         } else {
           const pj = opts.showProject ? ((byId(state.projects, e.project) || {}).short || '') : '';
-          const metaTxt = `${pj ? pj + '  ' : ''}${t.short.toUpperCase()}`;
+          const metaTxt = `${pj ? pj + '  ' : ''}${t.short.toUpperCase()}${e.promoEnd ? '   ' + promoLabel(e).toUpperCase() : ''}`;
           const tl = titleLines(e.title, fs) * lineH(fs);
           s.addText(e.title, { x: x + 0.1, y: iy + 0.03, w: w - 0.12, h: tl, fontFace: b.pptBody, fontSize: fs, bold: true, color: hx(b.fg), valign: 'top', margin: 0, fit: 'shrink' });
           const my = iy + 0.03 + tl, mh = lineH(fs - 2), icons = e.platforms || [], iconS = Math.min(0.15, mh), iconsW = icons.length * (iconS + 0.03);
