@@ -133,6 +133,7 @@ details p { color: var(--muted); font-size: 12.5px; margin: 6px 0; }
 .slide .item .pl { display: flex; gap: 3px; flex: none; }
 .slide .item .pl b { font-size: calc(8 * var(--u)); font-weight: 700; width: calc(15 * var(--u)); height: calc(15 * var(--u)); border-radius: 50%; display: grid; place-items: center; background: var(--s-pl); color: var(--s-pl-fg); letter-spacing: 0; }
 .slide .item .pl img { width: calc(15 * var(--u)); height: calc(15 * var(--u)); object-fit: contain; display: block; }
+.slide .item .ob { flex: none; font-size: calc(8 * var(--u)); font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: #fff; padding: calc(1.5 * var(--u)) calc(5 * var(--u)); border-radius: 999px; line-height: 1.2; }
 .slide .item .pj { flex: none; font-size: calc(8.5 * var(--u)); font-weight: 700; padding: 1px 4px; border-radius: 2px; background: var(--s-fg); color: var(--s-bg); letter-spacing: .04em; }
 .slide .day .n { font-size: calc(13 * var(--u)); }
 .slide.compact .dow div { font-size: 10px; letter-spacing: .08em; }
@@ -141,7 +142,7 @@ details p { color: var(--muted); font-size: 12.5px; margin: 6px 0; }
 .slide.compact .item { padding: 2px 4px 3px; gap: 1px; border-left-width: 3px; }
 .slide.compact .item .tt { font-size: calc(10 * var(--u)); line-height: 1.15; }
 .slide.compact .item .meta { display: none; }
-.slide .ftr { height: 56px; display: flex; align-items: center; justify-content: space-between; font-size: 12.5px; color: var(--s-muted); gap: 20px; }
+.slide .ftr { height: 28px; display: flex; align-items: center; justify-content: space-between; font-size: 12.5px; color: var(--s-muted); gap: 20px; }
 .slide .legend { display: flex; gap: 16px; flex-wrap: wrap; }
 .slide .legend span { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
 .slide .legend b { font-weight: 700; font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: var(--s-fg); }
@@ -322,7 +323,8 @@ const DEFAULT_TYPES = [
   { id: 'reel', label: 'Reel', short: 'Reel', count: 1 }, { id: 'image', label: 'Image', short: 'Image', count: 1 }, { id: 'grid', label: 'Grid post (3 posts)', short: 'Grid ×3', count: 3 },
   { id: 'carousel', label: 'Carousel', short: 'Carousel', count: 1 }, { id: 'story', label: 'Story', short: 'Story', count: 1 }, { id: 'video', label: 'Video', short: 'Video', count: 1 },
 ];
-const DEFAULT_CATEGORIES = [{ id: 'tactical', label: 'Tactical' }, { id: 'lifestyle', label: 'Lifestyle' }, { id: 'event', label: 'Event' }, { id: 'launch', label: 'Launch' }, { id: 'promotion', label: 'Promotion' }];
+const DEFAULT_CATEGORIES = [{ id: 'tactical', label: 'Tactical', color: '#C0392B' }, { id: 'lifestyle', label: 'Lifestyle', color: '#2E8B57' }, { id: 'event', label: 'Event', color: '#8E44AD' }, { id: 'launch', label: 'Launch', color: '#E67E22' }, { id: 'promotion', label: 'Promotion', color: '#2980B9' }];
+const OBJECTIVE_COLORS = ['#C0392B', '#2E8B57', '#8E44AD', '#E67E22', '#2980B9', '#16A085', '#7F8C8D', '#D4AC0D'];
 const DEFAULT_PROJECTS = [{ id: 'corporate', label: 'Corporate', short: 'QD' }, { id: 'aar', label: 'Alam Al Roum', short: 'AAR' }, { id: 'cg', label: 'CityGate', short: 'CG' }, { id: 'str', label: 'St. Regis Residences', short: 'STR' }, { id: 'event', label: 'Event', short: 'EVT' }];
 const DOW = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
 const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -372,7 +374,8 @@ function normalize(s) {
   s.types = s.types && s.types.length ? s.types : structuredClone(DEFAULT_TYPES);
   s.categories = s.categories && s.categories.length ? s.categories : structuredClone(DEFAULT_CATEGORIES);
   s.projects = s.projects && s.projects.length ? s.projects : structuredClone(DEFAULT_PROJECTS);
-  s.campaigns = s.campaigns || []; s.entries = s.entries || []; s.icons = s.icons || {}; s.view = s.view === 'hap' ? 'hap' : 'date';
+  s.campaigns = s.campaigns || []; s.entries = s.entries || []; s.icons = s.icons || {};
+  s.categories.forEach((c, i) => { if (!c.color) c.color = (DEFAULT_CATEGORIES.find(d => d.id === c.id) || {}).color || OBJECTIVE_COLORS[i % OBJECTIVE_COLORS.length]; }); s.view = s.view === 'hap' ? 'hap' : 'date';
   s.span = +s.span || 1; s.weekStart = s.weekStart == null ? 6 : +s.weekStart;
   if (!BRANDS[s.brand]) s.brand = 'qd';
   if (!/^\d{4}-\d{2}$/.test(s.month || '')) s.month = new Date().toISOString().slice(0, 7);
@@ -465,7 +468,7 @@ function renderLists() {
   const defs = [
     { key: 'campaigns', title: 'Happenings / campaigns', color: true, inputId: 'newCampaign', ph: 'e.g. Riverside launch' },
     { key: 'types', title: 'Content types', ph: 'e.g. Live session' },
-    { key: 'categories', title: 'Objectives', ph: 'e.g. Awareness' },
+    { key: 'categories', title: 'Objectives', color: true, ph: 'e.g. Awareness' },
     { key: 'projects', title: 'Projects (Qatari Diar calendar)', ph: 'e.g. New project' },
   ];
   $('lists').innerHTML = defs.map(d => `<div class="list-ed"><span class="lbl">${d.title}</span><div class="chips">${state[d.key].map(x => `<span class="chip" data-id="${x.id}">${d.color ? `<input type="color" value="${x.color}" data-col="${x.id}" aria-label="Colour" style="width:18px;height:18px;padding:0;border:none;background:none">` : ''}${esc(x.label)}<span class="x" data-del="${x.id}" role="button" aria-label="Remove">×</span></span>`).join('')}</div><div class="row"><input id="${d.inputId || 'new_' + d.key}" placeholder="${d.ph}" style="flex:1 1 160px"><button class="small" data-add="${d.key}">Add</button></div></div>`).join('');
@@ -473,6 +476,7 @@ function renderLists() {
     const key = b.dataset.add, inp = b.previousElementSibling, label = inp.value.trim(); if (!label) return;
     const item = { id: uid(), label };
     if (key === 'campaigns') item.color = nextColor();
+    if (key === 'categories') item.color = OBJECTIVE_COLORS.find(c => !state.categories.some(x => x.color === c)) || OBJECTIVE_COLORS[state.categories.length % OBJECTIVE_COLORS.length];
     if (key === 'types') { item.short = label; item.count = /grid|3 posts/i.test(label) ? 3 : 1; }
     if (key === 'projects') item.short = label.split(/\s+/).map(w => w[0]).join('').toUpperCase().slice(0, 3);
     state[key].push(item); inp.value = ''; fillSelects(); if (key === 'campaigns') $('fCampaign').value = item.id; commit();
@@ -484,7 +488,7 @@ function renderLists() {
     state.entries.forEach(e => { if (e[field] === id) e[field] = key === 'campaigns' ? '' : (state[key][0] || {}).id || ''; });
     fillSelects(); commit();
   });
-  $('lists').querySelectorAll('[data-col]').forEach(c => c.oninput = () => { const it = byId(state.campaigns, c.dataset.col); if (it) { it.color = c.value; commit(); } });
+  $('lists').querySelectorAll('[data-col]').forEach(c => c.oninput = () => { const it = byId(state.campaigns, c.dataset.col) || byId(state.categories, c.dataset.col); if (it) { it.color = c.value; commit(); } });
   $('lists').querySelectorAll('input[placeholder]').forEach(i => i.onkeydown = (e) => { if (e.key === 'Enter') i.nextElementSibling.click(); });
   renderIcons();
 }
@@ -542,8 +546,9 @@ function itemHtml(e, b, showProject) {
   const t = typeOf(e), c = campOf(e), col = c ? c.color : b.muted, cat = byId(state.categories, e.category);
   const pl = `<span class="pl">${(e.platforms || []).map(badge).join('')}</span>`;
   const pj = showProject ? `<span class="pj">${esc((byId(state.projects, e.project) || {}).short || '')}</span>` : '';
-  const ty = `<span class="ty">${esc(t.short)}${cat ? ' · ' + esc(cat.label) : ''}</span>`;
-  return `<div class="item" style="--c:${col};--tint:${mix(b.cell, col, 0.14)}"><span class="tt">${esc(e.title)}</span><span class="meta">${pj}${ty}${pl}</span></div>`;
+  const ty = `<span class="ty">${esc(t.short)}</span>`;
+  const ob = cat ? `<span class="ob" style="background:${cat.color}">${esc(cat.label)}</span>` : '';
+  return `<div class="item" style="--c:${col};--tint:${mix(b.cell, col, 0.14)}"><span class="tt">${esc(e.title)}</span><span class="meta">${pj}${ob}${ty}${pl}</span></div>`;
 }
 function monthHtml(ym, b, opts) {
   const { y, m, days, offset, rows } = monthInfo(ym), map = entriesFor(ym);
@@ -579,7 +584,7 @@ function render() {
       <div class="stats"><div class="stat"><b>${postCount(all)}</b><span>Posts</span></div><div class="stat"><b>${camps.length}</b><span>Happenings</span></div><div class="stat"><b>${plats.length}</b><span>Platforms</span></div></div></div>
     ${strip}
     <div class="months" id="months" style="--n:${ms.length}">${ms.map(ym => monthHtml(ym, b, { compact, showName: compact, showProject })).join('')}</div>
-    <div class="ftr"><div class="legend">${cats.map(c => `<span><b>${esc(c.label)}</b></span>`).join('')}${cats.length && plats.length ? '<span class="sep"></span>' : ''}${plats.map(p => `<span>${state.icons[p.id] ? `<img src="${state.icons[p.id]}" alt="">` : `<span class="k">${esc(p.short)}</span>`}${esc(p.label)}</span>`).join('')}</div><div class="r">${all.length} entries · ${esc(b.name)}</div></div>
+    <div class="ftr"></div>
     <div class="accentline"></div>`;
   const slide = $('slide');
   slide.className = 'slide' + (compact ? ' compact' : ''); slide.style.cssText = slideVars(b); slide.innerHTML = html;
@@ -591,7 +596,7 @@ function render() {
   $('viewDate').setAttribute('aria-pressed', state.view === 'date'); $('viewHap').setAttribute('aria-pressed', state.view === 'hap');
   const row = ({ e, i }) => {
     const t = typeOf(e), c = campOf(e), cat = byId(state.categories, e.category), d = new Date(e.date + 'T00:00:00');
-    return `<div class="entry"><div class="d">${d.getDate()}<small>${DOW[d.getDay()].slice(0, 3)}${compact ? ' ' + MONTHS[d.getMonth()].slice(0, 3) : ''}</small></div><div class="t"><b><span class="tag" style="background:${c ? c.color : b.muted}"></span>${esc(e.title)}</b><span>${esc(t.short)}${cat ? ' · ' + esc(cat.label) : ''}${c && state.view !== 'hap' ? ' · ' + esc(c.label) : ''} · ${(e.platforms || []).map(id => (byId(PLATFORMS, id) || {}).short || id).join(' ')}</span></div><button class="small ghost" data-del="${i}" aria-label="Remove">✕</button></div>`;
+    return `<div class="entry"><div class="d">${d.getDate()}<small>${DOW[d.getDay()].slice(0, 3)}${compact ? ' ' + MONTHS[d.getMonth()].slice(0, 3) : ''}</small></div><div class="t"><b><span class="tag" style="background:${c ? c.color : b.muted}"></span>${esc(e.title)}</b><span>${esc(t.short)}${cat ? ' · <i class="tag" style="background:' + cat.color + ';margin-right:3px"></i>' + esc(cat.label) : ''}${c && state.view !== 'hap' ? ' · ' + esc(c.label) : ''} · ${(e.platforms || []).map(id => (byId(PLATFORMS, id) || {}).short || id).join(' ')}</span></div><button class="small ghost" data-del="${i}" aria-label="Remove">✕</button></div>`;
   };
   if (state.view === 'hap') {
     const groups = [...state.campaigns.map(c => ({ c, items: list.filter(x => x.e.campaign === c.id) })), { c: null, items: list.filter(x => !campOf(x.e)) }];
@@ -715,11 +720,16 @@ function pptMonth(pptx, s, b, ym, R, opts) {
           s.addText(e.title, { x: x + 0.1, y: iy, w: w - 0.1, h: ih, fontFace: b.pptBody, fontSize: fs, bold: true, color: hx(b.fg), valign: 'middle', margin: 0, fit: 'shrink' });
         } else {
           const pj = opts.showProject ? ((byId(state.projects, e.project) || {}).short || '') : '';
-          const metaTxt = `${pj ? pj + '  ' : ''}${t.short.toUpperCase()}${cat ? ' · ' + cat.label.toUpperCase() : ''}`;
+          const metaTxt = `${pj ? pj + '  ' : ''}${t.short.toUpperCase()}`;
           const tl = titleLines(e.title, fs) * lineH(fs);
           s.addText(e.title, { x: x + 0.1, y: iy + 0.03, w: w - 0.12, h: tl, fontFace: b.pptBody, fontSize: fs, bold: true, color: hx(b.fg), valign: 'top', margin: 0, fit: 'shrink' });
           const my = iy + 0.03 + tl, mh = lineH(fs - 2), icons = e.platforms || [], iconS = Math.min(0.15, mh), iconsW = icons.length * (iconS + 0.03);
-          s.addText(metaTxt, { x: x + 0.1, y: my, w: Math.max(0.2, w - 0.14 - iconsW), h: mh, fontFace: b.pptBody, fontSize: fs - 2, bold: true, charSpacing: 1, color: hx(b.muted), valign: 'middle', margin: 0, fit: 'shrink' });
+          let mx = x + 0.1;
+          if (cat) { const pw = cat.label.length * (fs - 3) * 0.0095 + 0.12, ph = Math.min(mh, 0.16);
+            s.addShape(pptx.ShapeType.roundRect, { x: mx, y: my + (mh - ph) / 2, w: pw, h: ph, rectRadius: ph / 2, fill: { color: hx(cat.color) }, line: { color: hx(cat.color) } });
+            s.addText(cat.label.toUpperCase(), { x: mx, y: my + (mh - ph) / 2, w: pw, h: ph, fontFace: b.pptBody, fontSize: fs - 3, bold: true, charSpacing: 1, color: 'FFFFFF', align: 'center', valign: 'middle', margin: 0, fit: 'shrink' });
+            mx += pw + 0.05; }
+          s.addText(metaTxt, { x: mx, y: my, w: Math.max(0.2, x + w - 0.04 - iconsW - mx), h: mh, fontFace: b.pptBody, fontSize: fs - 2, bold: true, charSpacing: 1, color: hx(b.muted), valign: 'middle', margin: 0, fit: 'shrink' });
           icons.forEach((id, i) => {
             const px = x + w + 0.04 - iconsW + i * (iconS + 0.03), py = my + (mh - iconS) / 2;
             if (state.icons[id]) s.addImage({ data: state.icons[id], x: px, y: py, w: iconS, h: iconS });
@@ -734,6 +744,10 @@ function pptMonth(pptx, s, b, ym, R, opts) {
   }
 }
 function pptFooter(pptx, s, b, all, cats) {
+  const W = 13.333;
+  s.addShape(pptx.ShapeType.rect, { x: 0, y: 7.5 - 0.05, w: W, h: 0.05, fill: { color: hx(b.accent) }, line: { color: hx(b.accent) } });
+}
+function pptFooterOld(pptx, s, b, all, cats) {
   const W = 13.333, M = 0.47, fy = 7.5 - 0.5;
   const plats = PLATFORMS.filter(p => all.some(e => (e.platforms || []).includes(p.id)));
   let x = M;
@@ -750,7 +764,7 @@ function pptFooter(pptx, s, b, all, cats) {
 async function exportPptx() {
   const b = BRANDS[state.brand], ms = monthsShown(), showProject = state.brand === 'qd';
   const pptx = new PptxGenJS(); pptx.layout = 'LAYOUT_WIDE'; pptx.title = `${b.name} Content Calendar ${rangeTitle()}`;
-  const W = 13.333, M = 0.47, gridBottom = 7.5 - 0.6;
+  const W = 13.333, M = 0.47, gridBottom = 7.5 - 0.3;
   const buildSlide = (months, compact, title, sub) => {
     const s = pptx.addSlide();
     const all = months.flatMap(ym => Object.values(entriesFor(ym)).flat());
