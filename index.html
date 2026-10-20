@@ -102,20 +102,26 @@ details p { color: var(--muted); font-size: 12.5px; margin: 6px 0; }
 .slide .eyebrow small { display: block; font-weight: 400; letter-spacing: .08em; text-transform: none; color: var(--s-muted); font-size: 13px; margin-top: 4px; }
 .slide .logo { height: var(--logo-h); display: flex; align-items: flex-start; }
 .slide .logo img { height: 100%; width: auto; }
-.slide .head { display: flex; justify-content: space-between; align-items: flex-end; gap: 40px; height: 96px; padding-bottom: 12px; }
-.slide .stats { display: flex; gap: 28px; align-items: flex-end; padding-bottom: 6px; }
-.slide .stat { text-align: right; }
-.slide .stat b { display: block; font-family: var(--s-display); font-size: 30px; line-height: 1; font-weight: var(--s-display-weight); font-style: var(--s-display-style); }
-.slide .stat span { font-size: 10.5px; letter-spacing: .14em; text-transform: uppercase; color: var(--s-muted); font-weight: 600; }
-.slide .strip { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
-.slide .hap { display: flex; align-items: center; gap: 10px; background: var(--s-cell); border: 1px solid var(--s-line); border-left: 5px solid var(--c); border-radius: 3px; padding: 5px 12px 5px 9px; min-width: 0; }
-.slide .hap b { font-size: 13px; font-weight: 600; white-space: nowrap; }
-.slide .hap span { font-size: 10.5px; color: var(--s-muted); white-space: nowrap; letter-spacing: .04em; }
-.slide .hap span em { font-style: normal; font-weight: 700; color: var(--c); }
+.slide .head { display: flex; justify-content: space-between; align-items: flex-end; gap: 40px; height: 84px; padding-bottom: 14px; }
+.slide .body { flex: 1; display: flex; gap: 26px; min-height: 0; }
+.slide .side { width: 250px; flex: none; display: flex; flex-direction: column; gap: 12px; min-height: 0; overflow: hidden; border-left: 1px solid var(--s-line); padding-left: 22px; }
+.slide .side h4 { margin: 0 0 6px; font-size: 10.5px; letter-spacing: .18em; text-transform: uppercase; color: var(--s-muted); font-weight: 600; }
+.slide .side .sec { display: flex; flex-direction: column; gap: 6px; }
+.slide .sh { display: flex; gap: 9px; align-items: flex-start; min-width: 0; }
+.slide .sh i { width: 10px; height: 26px; border-radius: 2px; background: var(--c); flex: none; margin-top: 1px; }
+.slide .sh b { display: block; font-size: 12.5px; font-weight: 600; line-height: 1.2; }
+.slide .sh span { display: block; font-size: 10.5px; color: var(--s-muted); margin-top: 2px; letter-spacing: .03em; }
+.slide .sh span em { font-style: normal; font-weight: 700; color: var(--c); }
+.slide .obs { display: flex; flex-wrap: wrap; gap: 5px 8px; align-items: center; }
+.slide .obs span { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; color: var(--s-muted); font-weight: 600; }
+.slide .obs i { font-style: normal; font-size: 8px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: #fff; padding: 2px 6px; border-radius: 999px; }
+.slide .side .tot { margin-top: auto; font-size: 11px; color: var(--s-muted); letter-spacing: .04em; line-height: 1.5; }
+.slide .side .tot b { color: var(--s-fg); font-size: 13px; }
+.slide .side.dense { gap: 8px; } .slide .side.dense .sh b { font-size: 11px; } .slide .side.dense .sh span { font-size: 9.5px; margin-top: 0; } .slide .side.dense .sh i { height: 20px; } .slide .side.dense .sec { gap: 4px; }
 .slide .title { font-family: var(--s-display); font-size: 54px; line-height: 1; font-weight: var(--s-display-weight); font-style: var(--s-display-style); letter-spacing: var(--s-display-ls); text-transform: var(--s-display-tt); }
 .slide .title small { display: block; font-family: var(--s-body); font-style: normal; font-weight: 500; text-transform: uppercase; letter-spacing: .18em; font-size: 12px; color: var(--s-muted); margin-top: 8px; }
-.slide .months { flex: 1; display: grid; grid-template-columns: repeat(var(--n), 1fr); gap: 28px; min-height: 0; overflow: hidden; --u: calc(1px * var(--fs, 1)); }
-.slide .mo { display: grid; grid-template-rows: auto 30px repeat(var(--rows), minmax(min-content, 1fr)); gap: 4px; min-height: 0; }
+.slide .months { flex: 1; display: grid; grid-template-columns: repeat(var(--n), 1fr); gap: 24px; min-height: 0; min-width: 0; overflow: hidden; --u: calc(1px * var(--fs, 1)); }
+.slide .mo { display: grid; grid-template-rows: auto 30px repeat(var(--rows), auto); gap: 4px; min-height: 0; min-width: 0; align-content: start; }
 .slide .mo .mname { font-family: var(--s-display); font-size: 24px; font-weight: var(--s-display-weight); font-style: var(--s-display-style); letter-spacing: var(--s-display-ls); text-transform: var(--s-display-tt); padding: 0 0 2px; line-height: 1.1; }
 .slide .mo .mname:empty { display: none; }
 .slide .dow { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; }
@@ -577,13 +583,15 @@ function render() {
   const cats = state.categories.filter(c => all.some(e => e.category === c.id));
   const logo = LOGOS[b.logo];
   const plats = PLATFORMS.filter(p => all.some(e => (e.platforms || []).includes(p.id)));
-  const strip = camps.length ? `<div class="strip">${camps.map(c => { const r = campRange(c.id, all); return `<div class="hap" style="--c:${c.color}"><b>${esc(c.label)}</b><span><em>${r.n}</em> ${r.n === 1 ? 'post' : 'posts'} · ${r.range}</span></div>`; }).join('')}</div>` : '';
+  const side = `<aside class="side${camps.length > 7 ? ' dense' : ''}">
+      ${camps.length ? `<div class="sec"><h4>Happenings</h4>${camps.map(c => { const r = campRange(c.id, all); return `<div class="sh" style="--c:${c.color}"><i></i><div><b>${esc(c.label)}</b><span><em>${r.n}</em> ${r.n === 1 ? 'post' : 'posts'} · ${r.range}</span></div></div>`; }).join('')}</div>` : ''}
+      ${cats.length ? `<div class="sec"><h4>Objectives</h4><div class="obs">${cats.map(c => `<span><i style="background:${c.color}">${esc(c.label)}</i>${postCount(all.filter(e => e.category === c.id))}</span>`).join('')}</div></div>` : ''}
+      <div class="tot"><b>${postCount(all)}</b> posts · <b>${all.length}</b> entries<br>${plats.map(p => esc(p.label)).join(' · ') || 'No platforms yet'}</div>
+    </aside>`;
   const html = `
     <div class="bar"><div class="eyebrow">${esc(state.eyebrow || b.eyebrow)}<small>${esc(b.name)} · ${esc(state.subtitle || 'Content Calendar')}</small></div><div class="logo">${logo ? `<img src="${logo.src}" alt="${esc(b.name)}">` : ''}</div></div>
-    <div class="head"><div class="title">${esc(rangeTitle())}<small>${compact ? ms.length + ' months at a glance' : 'Monthly content plan'}</small></div>
-      <div class="stats"><div class="stat"><b>${postCount(all)}</b><span>Posts</span></div><div class="stat"><b>${camps.length}</b><span>Happenings</span></div><div class="stat"><b>${plats.length}</b><span>Platforms</span></div></div></div>
-    ${strip}
-    <div class="months" id="months" style="--n:${ms.length}">${ms.map(ym => monthHtml(ym, b, { compact, showName: compact, showProject })).join('')}</div>
+    <div class="head"><div class="title">${esc(rangeTitle())}<small>${compact ? ms.length + ' months at a glance' : 'Monthly content plan'}</small></div></div>
+    <div class="body"><div class="months" id="months" style="--n:${ms.length}">${ms.map(ym => monthHtml(ym, b, { compact, showName: compact, showProject })).join('')}</div>${side}</div>
     <div class="ftr"></div>
     <div class="accentline"></div>`;
   const slide = $('slide');
@@ -625,12 +633,30 @@ function campRange(id, all) {
   const range = a === z ? f(a) : sameMonth ? `${+a.slice(8)}–${f(z)}` : `${f(a)} – ${f(z)}`;
   return { n: postCount(all.filter(e => e.campaign === id)), range };
 }
-// Titles always show in full: the grid rows grow to their content, and when a month is too full for the slide the calendar type scales down until it fits.
+// Titles always show in full: each week row is measured at its content height and the leftover space is shared out;
+// if a month cannot fit at full size, the calendar type steps down until it does.
 function fitText() {
   const m = $('months'); if (!m) return;
-  let fs = 1; m.style.setProperty('--fs', fs);
-  for (let i = 0; i < 12 && m.scrollHeight > m.clientHeight + 1; i++) { fs = Math.round((fs - 0.05) * 100) / 100; m.style.setProperty('--fs', fs); }
-  if (m.scrollHeight > m.clientHeight + 1) m.style.setProperty('--fs', 0.4);
+  const mos = [...m.querySelectorAll('.mo')], GAP = 4;
+  let fs = 1;
+  for (let i = 0; i < 14; i++) {
+    m.style.setProperty('--fs', fs);
+    mos.forEach(mo => mo.style.gridTemplateRows = '');
+    const avail = m.clientHeight;
+    const plans = mos.map(mo => {
+      const weeks = [...mo.querySelectorAll('.week')], name = mo.querySelector('.mname'), dow = mo.querySelector('.dow');
+      const nameH = name && name.offsetHeight ? name.offsetHeight : 0;
+      const fixed = nameH + dow.offsetHeight + (weeks.length + 1) * GAP;
+      const needs = weeks.map(w => w.offsetHeight), sum = needs.reduce((a, c) => a + c, 0);
+      return { mo, needs, nameH, dowH: dow.offsetHeight, fits: sum + fixed <= avail, extra: (avail - fixed - sum) / weeks.length };
+    });
+    if (plans.every(p => p.fits)) {
+      plans.forEach(p => p.mo.style.gridTemplateRows = `${p.nameH}px ${p.dowH}px ${p.needs.map(n => (n + p.extra).toFixed(1) + 'px').join(' ')}`);
+      return;
+    }
+    fs = Math.round((fs - 0.05) * 100) / 100; if (fs < 0.45) break;
+  }
+  mos.forEach(mo => mo.style.gridTemplateRows = '');
 }
 function fitStage() { const stage = $('stage'), w = stage.clientWidth || 800, s = w / 1600; stage.style.height = Math.round(900 * s) + 'px'; $('slide').style.transform = `scale(${s})`; }
 new ResizeObserver(fitStage).observe($('stage'));
@@ -656,31 +682,47 @@ async function exportPng() {
 
 const hx = (c) => c.replace('#', '');
 const PX = 13.333 / 1600; // inches per slide pixel
-function pptHeader(pptx, s, b, title, sub, camps, all) {
+function pptHeader(pptx, s, b, title, sub) {
   const W = 13.333, M = 0.47, logo = LOGOS[b.logo];
   s.background = { color: hx(b.bg) };
   s.addText([{ text: (state.eyebrow || b.eyebrow).toUpperCase(), options: { fontSize: 10, bold: true, charSpacing: 4, color: hx(b.fg), breakLine: true } },
              { text: `${b.name} · ${state.subtitle || 'Content Calendar'}`, options: { fontSize: 9, color: hx(b.muted) } }], { x: M, y: 0.32, w: 6, h: 0.5, fontFace: b.pptBody, valign: 'top', margin: 0 });
   if (logo) { const h = b.logoH * PX; s.addImage({ data: logo.src, x: W - M - h * logo.ar, y: 0.33, w: h * logo.ar, h }); }
   s.addText([{ text: title, options: { fontFace: b.pptDisplay, fontSize: 34, color: hx(b.fg), italic: b.displayStyle === 'italic', charSpacing: b.displayTt === 'uppercase' ? 3 : 0, breakLine: true } },
-             { text: sub.toUpperCase(), options: { fontFace: b.pptBody, fontSize: 8, color: hx(b.muted), charSpacing: 3 } }], { x: M, y: 0.85, w: 6.5, h: 0.85, valign: 'bottom', margin: 0 });
+             { text: sub.toUpperCase(), options: { fontFace: b.pptBody, fontSize: 8, color: hx(b.muted), charSpacing: 3 } }], { x: M, y: 0.85, w: 7, h: 0.75, valign: 'bottom', margin: 0 });
+  return 1.78;
+}
+function pptSide(pptx, s, b, R, camps, cats, all) {
+  s.addShape(pptx.ShapeType.line, { x: R.x - 0.18, y: R.y, w: 0, h: R.h, line: { color: hx(b.line), width: 0.75 } });
+  const dense = camps.length > 7, fsN = dense ? 8 : 9.5, fsM = dense ? 7 : 8, rowH = dense ? 0.3 : 0.4; let y = R.y;
+  const h4 = (txt) => { s.addText(txt, { x: R.x, y, w: R.w, h: 0.2, fontFace: b.pptBody, fontSize: 7.5, bold: true, charSpacing: 3, color: hx(b.muted), margin: 0, valign: 'middle' }); y += 0.24; };
+  if (camps.length) {
+    h4('HAPPENINGS');
+    camps.forEach(c => {
+      const r = campRange(c.id, all);
+      s.addShape(pptx.ShapeType.rect, { x: R.x, y: y + 0.02, w: 0.08, h: rowH - 0.06, fill: { color: hx(c.color) }, line: { color: hx(c.color) } });
+      s.addText([{ text: c.label, options: { fontSize: fsN, bold: true, color: hx(b.fg), breakLine: true } }, { text: `${r.n} ${r.n === 1 ? 'post' : 'posts'} · ${r.range}`, options: { fontSize: fsM, color: hx(b.muted) } }],
+        { x: R.x + 0.14, y, w: R.w - 0.14, h: rowH, fontFace: b.pptBody, valign: 'top', margin: 0, fit: 'shrink' });
+      y += rowH + (dense ? 0.04 : 0.06);
+    });
+    y += 0.12;
+  }
+  if (cats.length) {
+    h4('OBJECTIVES');
+    let x = R.x, lh = 0.2;
+    cats.forEach(c => {
+      const n = postCount(all.filter(e => e.category === c.id)), pw = c.label.length * 0.055 + 0.16;
+      if (x + pw + 0.3 > R.x + R.w) { x = R.x; y += lh + 0.05; }
+      s.addShape(pptx.ShapeType.roundRect, { x, y: y + 0.02, w: pw, h: lh - 0.04, rectRadius: (lh - 0.04) / 2, fill: { color: hx(c.color) }, line: { color: hx(c.color) } });
+      s.addText(c.label.toUpperCase(), { x, y: y + 0.02, w: pw, h: lh - 0.04, fontFace: b.pptBody, fontSize: 6, bold: true, charSpacing: 1, color: 'FFFFFF', align: 'center', valign: 'middle', margin: 0, fit: 'shrink' });
+      s.addText(String(n), { x: x + pw + 0.04, y, w: 0.3, h: lh, fontFace: b.pptBody, fontSize: 8, bold: true, color: hx(b.muted), margin: 0, valign: 'middle' });
+      x += pw + 0.34;
+    });
+    y += lh + 0.1;
+  }
   const plats = PLATFORMS.filter(p => all.some(e => (e.platforms || []).includes(p.id)));
-  const stats = [[postCount(all), 'POSTS'], [camps.length, 'HAPPENINGS'], [plats.length, 'PLATFORMS']];
-  stats.forEach(([n, l], i) => s.addText([{ text: String(n), options: { fontFace: b.pptDisplay, fontSize: 22, color: hx(b.fg), italic: b.displayStyle === 'italic', breakLine: true } }, { text: l, options: { fontFace: b.pptBody, fontSize: 7, bold: true, charSpacing: 3, color: hx(b.muted) } }],
-    { x: W - M - 1.3 * (stats.length - i), y: 0.95, w: 1.2, h: 0.75, align: 'right', valign: 'bottom', margin: 0 }));
-  // Happenings strip: wrapping row of tiles under the title
-  let x = M, y = 1.8, rowH = 0.36, gap = 0.08;
-  camps.forEach(c => {
-    const r = campRange(c.id, all), label = c.label, meta = `${r.n} ${r.n === 1 ? 'post' : 'posts'} · ${r.range}`;
-    const w = Math.min(W - 2 * M, 0.3 + label.length * 0.085 + meta.length * 0.062 + 0.35);
-    if (x + w > W - M + 0.01) { x = M; y += rowH + gap; }
-    s.addShape(pptx.ShapeType.rect, { x, y, w, h: rowH, fill: { color: hx(b.cell) }, line: { color: hx(b.line), width: 0.5 } });
-    s.addShape(pptx.ShapeType.rect, { x, y, w: 0.05, h: rowH, fill: { color: hx(c.color) }, line: { color: hx(c.color) } });
-    s.addText([{ text: label + '   ', options: { bold: true, fontSize: 9.5, color: hx(b.fg) } }, { text: String(r.n), options: { bold: true, fontSize: 8, color: hx(c.color) } }, { text: ` ${r.n === 1 ? 'post' : 'posts'} · ${r.range}`, options: { fontSize: 8, color: hx(b.muted) } }],
-      { x: x + 0.12, y, w: w - 0.18, h: rowH, fontFace: b.pptBody, valign: 'middle', margin: 0, fit: 'shrink' });
-    x += w + gap;
-  });
-  return camps.length ? y + rowH + 0.14 : 1.95;
+  s.addText([{ text: String(postCount(all)), options: { bold: true, color: hx(b.fg), fontSize: 10 } }, { text: ' posts · ', options: { color: hx(b.muted), fontSize: 8 } }, { text: String(all.length), options: { bold: true, color: hx(b.fg), fontSize: 10 } }, { text: ' entries', options: { color: hx(b.muted), fontSize: 8, breakLine: true } },
+             { text: plats.map(p => p.label).join(' · '), options: { color: hx(b.muted), fontSize: 7.5 } }], { x: R.x, y: R.y + R.h - 0.5, w: R.w, h: 0.5, fontFace: b.pptBody, valign: 'bottom', margin: 0 });
 }
 function pptMonth(pptx, s, b, ym, R, opts) {
   const { y: Y, m, days, offset, rows } = monthInfo(ym), map = entriesFor(ym);
@@ -769,9 +811,10 @@ async function exportPptx() {
     const s = pptx.addSlide();
     const all = months.flatMap(ym => Object.values(entriesFor(ym)).flat());
     const camps = state.campaigns.filter(c => all.some(e => e.campaign === c.id)), cats = state.categories.filter(c => all.some(e => e.category === c.id));
-    const gridTop = pptHeader(pptx, s, b, title, sub, camps, all);
-    const n = months.length, g = 0.25, mw = (W - 2 * M - (n - 1) * g) / n;
+    const gridTop = pptHeader(pptx, s, b, title, sub);
+    const SW = 2.1, SG = 0.36, n = months.length, g = 0.22, mw = (W - 2 * M - SW - SG - (n - 1) * g) / n;
     months.forEach((ym, i) => pptMonth(pptx, s, b, ym, { x: M + i * (mw + g), y: gridTop, w: mw, h: gridBottom - gridTop }, { compact, showName: compact, showProject }));
+    pptSide(pptx, s, b, { x: W - M - SW, y: gridTop, w: SW, h: gridBottom - gridTop }, camps, cats, all);
     pptFooter(pptx, s, b, all, cats);
   };
   buildSlide(ms, ms.length > 1, rangeTitle(), ms.length > 1 ? ms.length + ' months at a glance' : 'Monthly content plan');
